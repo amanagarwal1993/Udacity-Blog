@@ -1,0 +1,125 @@
+<div class="topbar">
+    <div class="header">
+        <h1>Udacious Blog</h1>
+    </div>
+    <div class="nav">
+        <div><a href="#">Home Page</a></div>
+        <div><a href="#">Your Page</a></div>
+        <div><a href="#">Log Out</a></div>
+    </div>
+</div>
+
+<div class="form">
+    <form method="post">
+        <div class="title">
+            <label for="title">Title:</label>
+            <input type="text" name="title" value={{title}}>
+        </div>
+
+        <div class="content">
+            <label for="content">Content:</label>
+            <textarea name="content">{{content}}</textarea>
+        </div>
+        
+        <div class="submit">
+            <button id="submit" type="submit">Publish</button>
+        </div>
+        
+        <p class="error" style="color: red">{{pe}}</p>
+
+    </form>
+</div>
+        
+<style>    
+    .topbar {
+        height: 50px;
+        display: block;
+        width: 100%;
+        margin: -7px 0 40px 0;
+        padding-bottom: 30px;
+        border-bottom: 4px solid black;
+    }
+    
+    body h3 {
+        margin: 0 0 30px 20px;
+        font-style: italic;
+    }
+
+    .header {
+        margin-left: 20px;
+        float: left;
+    }
+    
+    .header p {
+        font-size: 13px;
+        margin-left: 4px;
+    }
+
+    .nav {
+        margin-top: 8px;
+        margin-right: 20px;
+        float: right;
+    }
+    
+    .nav div {
+        display: inline-block;
+        margin: 20px 15px;
+    }
+    
+    .nav a {
+        font-size: 20px;
+        text-decoration: none;
+    }
+    
+    .form {
+        width: 550px;
+        margin: 50px 0 0 50px;
+        font-family: monospace;
+        font-size: 1.5em;
+    }
+    
+    form div {
+        clear: both;
+        margin-top: 10px;
+    }
+
+    .form div label {
+        float: left;
+    }
+
+    .form div input {
+        min-width: 400px;
+        float: right;
+        text-align: right;
+        height: 2.5em;
+    }
+    
+    .form div textarea {
+        margin-top: 10px;
+        margin-bottom: 30px;
+        min-width: 550px;
+        min-height: 400px;
+        float: left;
+    }
+    
+    .submit {
+        clear: both;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .submit button {
+        margin: 0 30%;
+        padding: 10px;
+        font-size: 15px;
+        background-color: ghostwhite;
+        box-shadow: none;
+        border: 1px solid gray;
+    }
+    
+    .form p {
+        font-size: 15px;
+        text-align: center;
+    }
+    
+</style>
