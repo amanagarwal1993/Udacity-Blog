@@ -7,6 +7,14 @@ A multi-user blog application which has the following features:
 
 ## Usage
 
+##### How to run the project
+The app has been deployed for the public at [this url](https://amans-blog.appspot.com).
+To run the project locally,
+1. Make sure you have google app engine installed and configured
+2. Use command line to export your PATH to the google_appengine folder.
+3. Download project repository
+4. Navigate to the repo in your command line and execute this command: `dev_appserver.py .'
+
 ##### How the project is organized
 The app uses **google app engine** in python for its backend, along with an html template called **jinja2**.
 There are two kinds of files here: first is the `app.py` file that has all the backend python code. All the other files are html templates for different pages of the front-end.

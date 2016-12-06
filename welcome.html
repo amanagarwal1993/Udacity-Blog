@@ -27,7 +27,7 @@
             </div>
 
             <div class="submit">
-                <button id="submit" type="submit">Publish</button>
+                <button id="submit" name="publish" type="submit">Publish</button>
             </div>
 
             <p class="error" style="color: red">{{pe}}</p>
@@ -68,14 +68,23 @@
 
                 <div class="likebar">
                     {% if blogpost.comments %}
-                        <table>
-                            {% for comment in blogpost.comments %}
-                            <tr>
-                                <td class="left"><p>{{comment.get().commenter.get().username}}:</p></td>
-                                <td class="right"><p>{{comment.get().text}}</p></td>
-                            </tr>
-                            {% endfor %}
-                        </table>
+                        <form method="post">
+                            <table>
+                                {% for comment in blogpost.comments %}
+                                    <tr id="{{comment.id()}}">
+                                        <td class="left"><p>{{comment.get().commenter.get().username}}</p></td>
+                                        <td class="right">
+                                            <p class="comment-text" id="{{comment.id()}}">{{comment.get().text}}</p>
+                                        </td>
+                                        <td>
+                                            <div class="edit2">
+                                                <button class="edit-comment" name="{{comment.id()}}">Edit</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </form>
                     {% endif %}
 
                     <a href="/{{blogpost.key.id()}}"><button>Add comment</button></a>
@@ -233,6 +242,8 @@
         background-color: #f9f8f8;
         display: inline-block;
         border-bottom: 1px solid lightgray;
+        color: black;
+        text-decoration: none;
     }
     
     .titlebar h3 {
@@ -280,7 +291,7 @@
         border-top: 1px solid lightgray;
     }
     
-    .likebar button {
+    .likebar a button {
         cursor: pointer;
         padding: 7px;
         color: darkblue;
@@ -301,23 +312,61 @@
         font-size: 15px;
     }
     
+    .likebar tr {
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+    
     .left p {
         font-weight: bold;
         font-size: 12px;
-        margin: -15px 5px 0 5px;
+        margin: 0px 5px 0 5px;
         font-family: sans-serif;
     }
     
+    .likebar form {
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+    
+    .likebar form input {
+        width: 470px;
+        height: 50px;
+    }
+    
     .right p {
+        display: inline-block;
         font-size: 12px;
         font-family: sans-serif;
         color: #6f6f6f;
     }
     
     
+    .right textarea {
+        display: inline-block;
+        font-size: 12px;
+        font-family: sans-serif;
+        color: #6f6f6f;
+    }
+    
+    .edit2 {
+        display: inline-block;
+        width: 30px;
+        margin-left: 10px;
+        margin-top: -10px;
+    }
+    
+    .edit2 button {
+        width: 40px;
+        font-size: 8px;
+        float: right;
+    }
+    
+    
 </style>
 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+
 
 <script type="text/javascript">
     
@@ -328,3 +377,21 @@
     
 </script>
 
+
+<script type="text/javascript">
+    
+    $('.edit-comment').click(function(e) {
+        e.preventDefault();
+        var comment_id = '#' + this.name;
+        var old_text = $(comment_id + ' .right p').text();
+        var comment_writer = $(comment_id + ' .left p');
+        
+        var form = '<input type="hidden" name="edited_comment_id" value=' + this.name + '><input type="hidden" name="comment_writer" value=' + comment_writer + '><textarea name="new_text">' + old_text + '</textarea>';
+        
+        var new_buttons = '<button name="save" type="submit" value="save">Save</button><button name="cancel" type="submit" value="cancel">Cancel</button><button name="delete" type="submit" value="delete">Delete</button>'
+        
+        $(comment_id + ' .right p').replaceWith(form);
+        $(comment_id + ' .edit2 button').replaceWith(new_buttons);
+    });
+    
+</script>

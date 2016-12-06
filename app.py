@@ -5,7 +5,12 @@ import string
 import hashlib
 import os
 import jinja2
+import models
 from google.appengine.ext import ndb
+
+Blogpost = models.Blogpost
+User = models.User
+Comment = models.Comment
 
 template_dir = os.path.dirname(os.path.abspath(__file__))
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
@@ -23,35 +28,6 @@ class Handler(webapp2.RequestHandler):
 
     def render_stuff(self, template, **kw):
         self.write(self.render_str(template, **kw))
-
-
-# Creating a model for user database.
-class User(ndb.Model):
-    username = ndb.StringProperty(required=True)
-    pwd_hash = ndb.StringProperty(required=True)
-    email = ndb.StringProperty()
-    # each user entity will also have a list of keys
-    # of different posts published by them
-    blog_posts = ndb.KeyProperty(repeated=True)
-    liked_posts = ndb.KeyProperty(repeated=True)
-
-
-# Each blogpost is stored in a different database
-class Blogpost(ndb.Model):
-    title = ndb.TextProperty(required=True)
-    writer = ndb.KeyProperty(required=True)
-    content = ndb.TextProperty(required=True)
-    date_of_creation = ndb.DateTimeProperty(auto_now_add=True)
-    upvotes = ndb.IntegerProperty(required=True, default=0)
-    comments = ndb.KeyProperty(repeated=True)
-
-
-# Each individual comment is also kept separately in a new database
-class Comment(ndb.Model):
-    blog_post = ndb.KeyProperty(required=True, kind=Blogpost)
-    commenter = ndb.KeyProperty(required=True, kind=User)
-    text = ndb.StringProperty(required=True)
-    creation_time = ndb.DateTimeProperty(auto_now_add=True)
 
 
 # Functions to help verify user input
@@ -120,6 +96,8 @@ def get_cookie_val(self, name):
 
 def still_logged_in(self):
     hashstring = get_cookie_val(self, 'user')
+    if hashstring == None:
+        return False
     if user_check(hashstring):
         username = (hashstring.split('|'))[0]
         q = ndb.gql('SELECT * FROM User WHERE username = :1', username)
@@ -142,7 +120,10 @@ class Main(Handler):
             self.redirect('/welcome')
         else:
             blogs = (Blogpost.query().order(-Blogpost.date_of_creation)).fetch(20)
-            self.render_stuff('main.html', blogs=blogs)
+            if blogs:
+                self.render_stuff('main.html', blogs=blogs)
+            else:
+                self.redirect('/signup')
 
 
 class Signup(Handler):
@@ -183,6 +164,7 @@ class Signup(Handler):
                     new_user = User(username=username,
                                     pwd_hash=make_pw_hash(username, password))
                 new_user.put()
+                
                 # Store user value securely
                 cookie = str(user_hash(username))
                 self.response.headers.add_header('Set-Cookie',
@@ -204,8 +186,7 @@ class Signup(Handler):
             if (verify != password):
                 verify_password_error = "Your passwords don't match."
 
-            self.render_stuff('index.html',
-                              username=username,
+            self.render_stuff('index.html', username=username,
                               email=email,
                               ue=username_error,
                               pe=password_error,
@@ -215,10 +196,10 @@ class Signup(Handler):
 
 class Login(Handler):
     def get(self):
-        if not still_logged_in(self):
-            self.render_stuff('login.html')
-        else:
+        if still_logged_in(self):
             self.response.write('You are already logged in! Go back. :)')
+        else:
+            self.render_stuff('login.html')
 
     def post(self):
         username = self.request.get('username')
@@ -234,9 +215,11 @@ class Login(Handler):
                     self.response.headers.add_header('Set-Cookie',
                         'user=%s; Path=/' % cookie)
                     self.redirect("/welcome")
+                else:
+                    self.render_stuff('login.html', error='Wrong password')
+                    
             else:
                 self.render_stuff('login.html', error='User not found')
-
 
 class Welcome(Handler):
     def get(self):
@@ -249,32 +232,66 @@ class Welcome(Handler):
             self.redirect('/login')
 
     def post(self):
-        title = self.request.get('title')
-        text = self.request.get('content')
+        if still_logged_in(self):
+            
+            if self.request.get('publish') == 'Publish':
+                title = self.request.get('title')
+                text = self.request.get('content')
 
-        # find user's name and key by fetching from database
-        user = current_user(self)
-        user_entity = (User.query(User.username == user).fetch())[0]
-        user_key = user_entity.key
+                # find user's name and key by fetching from database
+                user = current_user(self)
+                user_entity = (User.query(User.username == user).fetch())[0]
+                user_key = user_entity.key
 
-        if valid_title(title) and valid_text(text):
-            post = Blogpost(title=title, content=text, writer=user_key)
-            post_key = post.put()
+                if valid_title(title) and valid_text(text):
+                    post = Blogpost(title=title, content=text, writer=user_key)
+                    post_key = post.put()
 
-            user_entity.blog_posts.append(post_key)
-            user_key = user_entity.put()
+                    user_entity.blog_posts.append(post_key)
+                    user_key = user_entity.put()
 
-            self.redirect('/welcome')
+                    self.redirect('/welcome')
 
+                else:
+                    if valid_title(title):
+                        error = "Dude your text seems to be invalid..."
+                    if valid_text(text):
+                        error = "Dude, your title seems invalid"
+                    self.render_stuff('welcome.html',
+                                      username=user, title=title,
+                                      content=text, pe=error,
+                                      style='block')
+            
+            # Checking if the comment writer is same as logged user
+            else: 
+                if self.request.get('comment_writer') == current_user(self):
+                    # Now we do comment editing operations
+                    if self.request.get('cancel') == 'cancel':
+                        self.redirect(url)
+
+                    elif self.request.get('save') == 'save':
+                        new_text = self.request.get('new_text')
+                        comment_id = self.request.get('edited_comment_id')
+                        comment = Comment.get_by_id(int(comment_id))
+                        comment.text = new_text
+                        comment.put()
+                        self.redirect(url)
+
+                    elif self.request.get('delete') == 'delete':
+                        comment_id = self.request.get('edited_comment_id')
+                        comment_key = Comment.get_by_id(int(comment_id)).key
+
+                        blogpost.comments.remove(comment_key)
+                        comment_key.delete()
+                        blogpost.put()
+                        self.redirect(url)
+                else:
+                    self.response.write('''You are not authorized 
+                                        to edit this comment. 
+                                        Click <a href=' + url + '>here</a> 
+                                        to go back.''')
         else:
-            if valid_title(title):
-                error = "Dude your text seems to be invalid..."
-            if valid_text(text):
-                error = "Dude, your title seems invalid"
-            self.render_stuff('welcome.html',
-                              username=user, title=title,
-                              content=text, pe=error,
-                              style='block')
+            self.redirect('/login')
 
 
 class Logout(Handler):
@@ -286,8 +303,7 @@ class Logout(Handler):
 class EditPost(Handler):
     def get(self, post_id):
         blogpost = Blogpost.get_by_id(int(post_id))
-        if still_logged_in(self) and
-        current_user(self) == blogpost.writer.get().username:
+        if still_logged_in(self) and current_user(self) == blogpost.writer.get().username:
             self.render_stuff('blogpost_edit.html',
                               post_id=post_id, blogpost=blogpost, 
                               title=blogpost.title,
@@ -296,32 +312,33 @@ class EditPost(Handler):
                               user=blogpost.writer.get().username)
         else:
             self.response.write('''You are either offline or you are not 
-                                authorized to delete this post. 
+                                authorized to edit this post. 
                                 Please go back and try again.''')
 
     def post(self, post_id):
-        save = self.request.get('save')
-        cancel = self.request.get('cancel')
+        if still_logged_in(self) and current_user(self) == blogpost.writer.get().username:
+            save = self.request.get('save')
+            cancel = self.request.get('cancel')
+            url = '/' + str(post_id)
 
-        if cancel == 'cancel':
-            self.redirect('/welcome')
+            if cancel == 'cancel':
+                self.redirect(url)
 
-        if save == 'save':
-            new_title = self.request.get('title')
-            new_text = self.request.get('content')
+            elif save == 'save':
+                new_title = self.request.get('title')
+                new_text = self.request.get('content')
 
-            blogpost = Blogpost.get_by_id(int(post_id))
-            blogpost.title = new_title
-            blogpost.content = new_text
-            blogpost.put()
-            self.redirect('/welcome')
+                blogpost = Blogpost.get_by_id(int(post_id))
+                blogpost.title = new_title
+                blogpost.content = new_text
+                blogpost.put()
+                self.redirect(url)
 
 
 class DeletePost(Handler):
     def get(self, post_id):
         blogpost = Blogpost.get_by_id(int(post_id))
-        if still_logged_in(self) and
-        current_user(self) == blogpost.writer.get().username:
+        if still_logged_in(self) and current_user(self) == blogpost.writer.get().username:
             blogpost = Blogpost.get_by_id(int(post_id))
             self.render_stuff('blogpost_delete.html',
                               post_id=post_id, blogpost=blogpost,
@@ -335,7 +352,7 @@ class DeletePost(Handler):
                                 Please go back and try again.''')
 
     def post(self, post_id):
-        if still_logged_in(self):
+        if still_logged_in(self) and current_user(self) == blogpost.writer.get().username:
             user = current_user(self)
             user_entity = (User.query(User.username == user).fetch())[0]
             user_key = user_entity.key
@@ -345,6 +362,8 @@ class DeletePost(Handler):
             post_key.delete()
             user_key = user_entity.put()
             self.redirect('/welcome')
+        else:
+            self.redirect('/login')
 
 
 class AddComment(Handler):
@@ -361,7 +380,7 @@ class AddComment(Handler):
                 blogpost = Blogpost.get_by_id(int(post_id))
 
                 # check if post is already liked
-                if blogpost.key in user_entity.liked_posts:
+                if (blogpost.key in user_entity.liked_posts) and not (current_user(self) == blogpost.writer.get().username):
                     self.render_stuff('blogpost_addcomment.html',
                                       blogpost=blogpost,
                                       title=blogpost.title,
@@ -389,25 +408,30 @@ class AddComment(Handler):
             user_entity = (User.query(User.username == user).fetch())[0]
             user_key = user_entity.key
             blogpost = Blogpost.get_by_id(int(post_id))
+            url = '/' + str(post_id)
 
             # check for button pressed
             if self.request.get('like') == 'like':
-                blogpost.upvotes = blogpost.upvotes + 1
-                user_entity.liked_posts.append(blogpost.key)
-                user_key = user_entity.put()
-                blogpost.key = blogpost.put()
-                url = '/' + str(post_id)
-                self.redirect(url)
+                if not (current_user(self) == blogpost.writer.get().username):
+                    blogpost.upvotes = blogpost.upvotes + 1
+                    user_entity.liked_posts.append(blogpost.key)
+                    user_key = user_entity.put()
+                    blogpost.key = blogpost.put()
+                    self.redirect(url)
+                else:
+                    self.response.write('You cannot like your own post.')
 
-            if self.request.get('dislike') == 'like':
-                blogpost.upvotes -= 1
-                user_entity.liked_posts.remove(blogpost.key)
-                user_key = user_entity.put()
-                blogpost.key = blogpost.put()
-                url = '/' + str(post_id)
-                self.redirect(url)
+            elif self.request.get('dislike') == 'like':
+                if not (current_user(self) == blogpost.writer.get().username):
+                    blogpost.upvotes -= 1
+                    user_entity.liked_posts.remove(blogpost.key)
+                    user_key = user_entity.put()
+                    blogpost.key = blogpost.put()
+                    self.redirect(url)
+                else:
+                    self.response.write('You cannot dislike your own post.')
 
-            if self.request.get('newcomment') == 'newcomment':
+            elif self.request.get('newcomment') == 'newcomment':
                 comment_text = self.request.get('comment')
 
                 comment = Comment(blog_post=blogpost.key,
@@ -417,10 +441,34 @@ class AddComment(Handler):
 
                 blogpost.comments.append(comment_key)
                 blogpost.put()
-
-                url = '/' + str(post_id)
                 self.redirect(url)
+            
+            # Checking if the comment writer is same as logged user
+            if self.request.get('comment_writer') == current_user(self):
+                # Now we do comment editing operations
+                if self.request.get('cancel') == 'cancel':
+                    self.redirect(url)
 
+                elif self.request.get('save') == 'save':
+                    new_text = self.request.get('new_text')
+                    comment_id = self.request.get('edited_comment_id')
+                    comment = Comment.get_by_id(int(comment_id))
+                    comment.text = new_text
+                    comment.put()
+                    self.redirect(url)
+
+                elif self.request.get('delete') == 'delete':
+                    comment_id = self.request.get('edited_comment_id')
+                    comment_key = Comment.get_by_id(int(comment_id)).key
+
+                    blogpost.comments.remove(comment_key)
+                    comment_key.delete()
+                    blogpost.put()
+                    self.redirect(url)
+            else:
+                self.response.write('''You are not authorized for this. 
+                                    Click <a href=' + url + '>here</a> 
+                                    to go back.''')
         else:
             self.redirect('/login')
 
