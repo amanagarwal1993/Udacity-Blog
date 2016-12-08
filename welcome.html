@@ -1,15 +1,6 @@
-<body>
-    
-    <div class="topbar">
-            <div class="header">
-                <h1>Udacious Blog</h1>
-            </div>
-            <div class="nav">
-                <div><a href="/">Home Page</a></div>
-                <div><a href="/logout">Log Out</a></div>
-            </div>
-        </div>
-        
+{% extends "base1.html" %}
+{% block title %}Welcome{% endblock %}
+{% block main %}
     <h3>Welcome, {{username}}!</h3>
     
     <button id="show_form">Write new post!</button>
@@ -27,7 +18,7 @@
             </div>
 
             <div class="submit">
-                <button id="submit" name="publish" type="submit">Publish</button>
+                <button id="submit" name="publish" type="submit" value="publish">Publish</button>
             </div>
 
             <p class="error" style="color: red">{{pe}}</p>
@@ -72,6 +63,7 @@
                             <table>
                                 {% for comment in blogpost.comments %}
                                     <tr id="{{comment.id()}}">
+                                        <input class="blog_id" type="hidden" value="{{blogpost.key.id()}}">
                                         <td class="left"><p>{{comment.get().commenter.get().username}}</p></td>
                                         <td class="right">
                                             <p class="comment-text" id="{{comment.id()}}">{{comment.get().text}}</p>
@@ -96,8 +88,8 @@
             </div>
         {% endfor %}
     </div>
-</body>
-
+{% endblock %}
+{% block css %}
 <style>
     
     body {
@@ -362,9 +354,10 @@
         float: right;
     }
     
-    
 </style>
+{% endblock %}
 
+{% block js %}
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
 
 
@@ -375,18 +368,15 @@
         $('#show_form').css({'margin-bottom': 0})
     })
     
-</script>
-
-
-<script type="text/javascript">
     
     $('.edit-comment').click(function(e) {
         e.preventDefault();
         var comment_id = '#' + this.name;
         var old_text = $(comment_id + ' .right p').text();
-        var comment_writer = $(comment_id + ' .left p');
+        var comment_writer = $(comment_id + ' .left p').text();
+        var blog_id = $(comment_id + ' .blog_id').val();
         
-        var form = '<input type="hidden" name="edited_comment_id" value=' + this.name + '><input type="hidden" name="comment_writer" value=' + comment_writer + '><textarea name="new_text">' + old_text + '</textarea>';
+        var form = '<input type="hidden" name="edited_comment_id" value=' + this.name + '><input type="hidden" name="blog_id" value="' + blog_id + '"><input type="hidden" name="comment_writer" value=' + comment_writer + '><textarea name="new_text">' + old_text + '</textarea>';
         
         var new_buttons = '<button name="save" type="submit" value="save">Save</button><button name="cancel" type="submit" value="cancel">Cancel</button><button name="delete" type="submit" value="delete">Delete</button>'
         
@@ -395,3 +385,4 @@
     });
     
 </script>
+{% endblock %}

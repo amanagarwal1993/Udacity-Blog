@@ -1,17 +1,6 @@
-<head></head>
-<body>
-    
-    <div class="topbar">
-        <div class="header">
-            <h1>Udacious Blog</h1>
-        </div>
-        <div class="nav">
-            <div><a href="/">Home Page</a></div>
-            <div><a href="/logout">Log Out</a></div>
-        </div>
-    </div>
-    
-    
+{% extends "base1.html" %}
+{% block main %}
+
     <div class="blogpost">
         
         <div class="edit">
@@ -46,6 +35,8 @@
                 <table>
                     {% for comment in blogpost.comments %}
                         <tr id="{{comment.id()}}">
+                            <input class="blog_id" type="hidden" value="{{blogpost.key.id()}}">
+                            <p class="blog_id" style="display: none;">{{blogpost.key.id()}}</p>
                             <td class="left"><p>{{comment.get().commenter.get().username}}</p></td>
                             <td class="right">
                                 <p class="comment-text" id="{{comment.id()}}">{{comment.get().text}}</p>
@@ -72,8 +63,8 @@
         </div>
         
     </div>
-</body>
-
+{% endblock %}
+{% block css %}
 <style>
     
     .topbar {
@@ -266,7 +257,9 @@
     }
     
 </style>
+{% endblock %}
 
+{% block js %}
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
 
 <script type="text/javascript">
@@ -276,8 +269,9 @@
         var comment_id = '#' + this.name;
         var old_text = $(comment_id + ' .right p').text();
         var comment_writer = $(comment_id + ' .left p').text();
+        var blog_id = $(comment_id + ' .blog_id').val();
         
-        var form = '<input type="hidden" name="edited_comment_id" value=' + this.name + '><input type="hidden" name="comment_writer" value=' + comment_writer + '><textarea name="new_text">' + old_text + '</textarea>';
+        var form = '<input type="hidden" name="edited_comment_id" value=' + this.name + '><input type="hidden" name="blog_id" value=' + blog_id + '><input type="hidden" name="comment_writer" value=' + comment_writer + '><textarea name="new_text">' + old_text + '</textarea>';
         
         var new_buttons = '<button name="save" type="submit" value="save">Save</button><button name="cancel" type="submit" value="cancel">Cancel</button><button name="delete" type="submit" value="delete">Delete</button>'
         
@@ -286,3 +280,4 @@
     });
     
 </script>
+{% endblock %}

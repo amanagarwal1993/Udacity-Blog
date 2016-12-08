@@ -1,16 +1,5 @@
-<body>
-    
-    <div class="topbar">
-        <div class="header">
-            <h1>Udacious Blog</h1>
-        </div>
-        <div class="nav">
-            <div><a href="/">Home Page</a></div>
-            <div><a href="/logout">Log Out</a></div>
-        </div>
-    </div>
-    
-    
+{% extends "base1.html" %}
+{% block main %}
     <div class="form">
         <form method="post" name={{post_id}}>
             
@@ -33,25 +22,24 @@
         
     </div>
     
-        <div class="likebar">
-            <h4>COMMENTS</h4>
-            
-            {% if blogpost.comments %}
-            <table>
-                {% for comment in comments %}
-                <tr>
-                    <td class="left"><p>{{comment.commenter.get().username}}:</p></td>
-                    <td class="right"><p>{{comment.text}}</p></td>
-                </tr>
-                {% endfor %}
-            </table>
-            {% endif %}
-            
-        </div>
-        
-        
-</body>
+    <div class="likebar">
+        <h4>COMMENTS</h4>
 
+        {% if blogpost.comments %}
+        <table>
+            {% for comment in comments %}
+            <tr>
+                <td class="left"><p>{{comment.commenter.get().username}}:</p></td>
+                <td class="right"><p>{{comment.text}}</p></td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+    </div>
+{% endblock %}
+
+{% block css %}
 <style>
     
     .topbar {
@@ -268,3 +256,4 @@
     }
     
 </style>
+{% endblock %}

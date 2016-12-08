@@ -153,7 +153,6 @@ def still_logged_in(self):
             return True
     return False
 
-
 def current_user(self):
     hashstring = get_cookie_val(self, 'user')
     return (hashstring.split('|'))[0]
@@ -168,7 +167,7 @@ class Main(Handler):
         else:
             blogs = (Blogpost.query().order(-Blogpost.date_of_creation)).fetch(20)
             if blogs:
-                self.render_stuff('templates/main.html', blogs=blogs)
+                self.render_stuff('main.html', blogs=blogs)
             else:
                 self.redirect('/signup')
 
@@ -176,7 +175,7 @@ class Main(Handler):
 class Signup(Handler):
     def get(self):
         if not still_logged_in(self):
-            self.render_stuff('templates/signup.html')
+            self.render_stuff('signup.html')
         else:
             self.response.write('You are already logged in!')
 
@@ -198,7 +197,7 @@ class Signup(Handler):
             q = ndb.gql('SELECT * FROM User WHERE username = :1', username)
             results = q.fetch(1)
             if results:
-                self.render_stuff('templates/signup.html', username="",
+                self.render_stuff('signup.html', username="",
                                   email="", ue="", pe="",
                                   ve="", ee="",
                                   error="Username already exists!")
@@ -233,7 +232,7 @@ class Signup(Handler):
             if (verify != password):
                 verify_password_error = "Your passwords don't match."
 
-            self.render_stuff('templates/signup.html', username=username,
+            self.render_stuff('signup.html', username=username,
                               email=email,
                               ue=username_error,
                               pe=password_error,
@@ -246,7 +245,7 @@ class Login(Handler):
         if still_logged_in(self):
             self.response.write('You are already logged in! Go back. :)')
         else:
-            self.render_stuff('templates/login.html')
+            self.render_stuff('login.html')
 
     def post(self):
         username = self.request.get('username')
@@ -263,16 +262,16 @@ class Login(Handler):
                         'user=%s; Path=/' % cookie)
                     self.redirect("/welcome")
                 else:
-                    self.render_stuff('templates/login.html', error='Wrong password')
+                    self.render_stuff('login.html', error='Wrong password')
                     
             else:
-                self.render_stuff('templates/login.html', error='User not found')
+                self.render_stuff('login.html', error='User not found')
 
 class Welcome(Handler):
     def get(self):
         if still_logged_in(self):
             blogs = (Blogpost.query().order(-Blogpost.date_of_creation)).fetch(10)
-            self.render_stuff('templates/welcome.html',
+            self.render_stuff('welcome.html',
                               username=current_user(self),
                               style='none', blogs=blogs)
         else:
@@ -304,7 +303,7 @@ class Welcome(Handler):
                         error = "Dude your text seems to be invalid..."
                     if valid_text(text):
                         error = "Dude, your title seems invalid"
-                    self.render_stuff('templates/welcome.html',
+                    self.render_stuff('welcome.html',
                                       username=user, title=title,
                                       content=text, pe=error,
                                       style='block')
@@ -327,7 +326,7 @@ class EditPost(Handler):
     def get(self, post_id):
         blogpost = Blogpost.get_by_id(int(post_id))
         if still_logged_in(self) and current_user(self) == blogpost.writer.get().username:
-            self.render_stuff('templates/blogpost_edit.html',
+            self.render_stuff('blogpost_edit.html',
                               post_id=post_id, blogpost=blogpost, 
                               title=blogpost.title,
                               content=blogpost.content,
@@ -366,7 +365,7 @@ class DeletePost(Handler):
         blogpost = Blogpost.get_by_id(int(post_id))
         if still_logged_in(self) and current_user(self) == blogpost.writer.get().username:
             blogpost = Blogpost.get_by_id(int(post_id))
-            self.render_stuff('templates/blogpost_delete.html',
+            self.render_stuff('blogpost_delete.html',
                               post_id=post_id, blogpost=blogpost,
                               title=blogpost.title,
                               post_content=blogpost.content,
@@ -410,7 +409,7 @@ class AddComment(Handler):
 
                 # check if post is already liked
                 if (blogpost.key in user_entity.liked_posts) and not (current_user(self) == blogpost.writer.get().username):
-                    self.render_stuff('templates/blogpost_addcomment.html',
+                    self.render_stuff('blogpost_addcomment.html',
                                       blogpost=blogpost,
                                       title=blogpost.title,
                                       post_content=blogpost.content,
@@ -419,7 +418,7 @@ class AddComment(Handler):
                                       vote_direction='Unlike',
                                       votedir='dislike')
                 else:
-                    self.render_stuff('templates/blogpost_addcomment.html',
+                    self.render_stuff('blogpost_addcomment.html',
                                       blogpost=blogpost,
                                       title=blogpost.title,
                                       post_content=blogpost.content,
