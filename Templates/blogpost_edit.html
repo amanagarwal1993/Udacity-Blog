@@ -1,0 +1,259 @@
+{% extends "templates/base1.html" %}
+{% block main %}
+    <div class="form">
+        <form method="post" name={{post_id}}>
+            
+            <div class="title">
+                <label for="title">Title:</label>
+                <textarea type="text" name="title">{{title}}</textarea>
+            </div>
+
+            <div class="new_content">
+                <label for="content">Content:</label>
+                <textarea name="content">{{content}}</textarea>
+            </div>
+
+            <div class="submit">
+                <button id="submit" name="save" type="submit" value="save">Save and Publish</button>
+                <a href="/welcome"><button name="cancel" type="submit" value="cancel">Cancel</button></a>
+            </div>
+
+        </form>
+        
+    </div>
+    
+    <div class="likebar">
+        <h4>COMMENTS</h4>
+
+        {% if blogpost.comments %}
+        <table>
+            {% for comment in comments %}
+            <tr>
+                <td class="left"><p>{{comment.commenter.get().username}}:</p></td>
+                <td class="right"><p>{{comment.text}}</p></td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+    </div>
+{% endblock %}
+
+{% block css %}
+<style>
+    
+    .topbar {
+        height: 50px;
+        display: block;
+        width: 100%;
+        margin: -7px 0 40px 0;
+        padding-bottom: 30px;
+        border-bottom: 4px solid black;
+    }
+    
+    body h3 {
+        margin: 0 0 30px 50px;
+        font-style: italic;
+    }
+
+    .header {
+        margin-left: 20px;
+        float: left;
+    }
+    
+    .header p {
+        font-size: 13px;
+        margin-left: 4px;
+    }
+
+    .nav {
+        margin-top: 8px;
+        margin-right: 20px;
+        float: right;
+    }
+    
+    .nav div {
+        display: inline-block;
+        margin: 20px 15px;
+    }
+    
+    .nav a {
+        font-size: 20px;
+        text-decoration: none;
+    }
+
+    
+    .form {
+        width: 550px;
+        margin: 50px 0 50px 50px;
+        font-family: monospace;
+        font-size: 1.5em;
+    }
+    
+    .form a {
+        font-size: 13px;
+        font-family: sans-serif;
+        color: cornflowerblue;
+        font-weight: bold;
+    }
+    
+    form div {
+        clear: both;
+        margin-top: 10px;
+    }
+
+    .form div label {
+        float: left;
+    }
+
+    .form .title textarea {
+        min-width: 400px;
+        float: right;
+        text-align: right;
+        height: 2.5em;
+    }
+    
+    .form .new_content textarea {
+        margin-top: 10px;
+        margin-bottom: 30px;
+        min-width: 550px;
+        min-height: 400px;
+        float: left;
+    }
+    
+    .submit {
+        clear: both;
+        width: 100%;
+        text-align: center;
+    }
+    
+    #submit {
+        
+        padding: 10px;
+        font-size: 15px;
+        background-color: ghostwhite;
+        box-shadow: none;
+        border: 1px solid gray;
+    }
+    
+    .submit a button {
+        padding: 10px;
+        font-size: 15px;
+        background-color: ghostwhite;
+        box-shadow: none;
+        border: 1px solid gray;
+    }
+    
+    .form p {
+        font-size: 15px;
+        text-align: center;
+    }
+    
+    .blogpost {
+        width: 550px;
+    }
+    
+    .top {
+        width: 550px;
+        clear: both;
+    }
+    
+    .top div {
+        display: inline;
+        max-width: 520px;
+    }
+    
+    .top .upvotes {
+        margin-top: 0;
+        text-align: center;
+        padding: 20px 0;
+        width: 30px;
+        float: left;
+    }
+    
+    .top .titlebar {
+        width: 490px;
+        padding: 0 10px;
+        background-color: #f9f8f8;
+        display: inline-block;
+        border-bottom: 1px solid lightgray;
+    }
+    
+    .titlebar h3 {
+        margin-left: 0;
+        margin-bottom: 0;
+    }
+    
+    .titlebar hr {
+        color: black;
+        clear: both;
+    }
+
+    .content a {
+        text-decoration: none;
+        color: darkgray;
+        margin-bottom: 10px;
+        margin-right: 10px;
+        font-size: 10px;
+        float: right;
+    }
+    
+    .content {
+        width: 500px;
+        padding: 10px 0;
+        margin-left: 30px;
+        margin-bottom: 0;
+    }
+    
+    .content pre {
+        width: inherit;
+        white-space: pre-wrap;
+    }
+    
+    .likebar {
+        clear: both;
+        height: 20px;
+        width: 500px;
+        margin-left: 30px;
+        margin-top: -20px;
+        font-size: 15px;
+        border-top: 1px solid lightgray;
+    }
+    
+    .likebar h4 {
+        margin-top: 0px;
+        margin-bottom: -2px;
+        font-size: 11px;
+        font-family: BlinkMacSystemFont;
+        padding: 7px;
+        color: cornflowerblue;
+        background-color: white;
+        border: none;
+    }
+    
+    .likebar table {
+        margin-top: 10px;
+        margin-left: 3px;
+        border-collapse: separate;
+        border-spacing: 0 5px;
+    }
+    
+    .likebar tr {
+        margin-top: 10px;
+    }
+    
+    .left p {
+        font-weight: bold;
+        font-size: 12px;
+        margin: -15px 5px 0 5px;
+        font-family: sans-serif;
+    }
+    
+    .right p {
+        font-size: 12px;
+        font-family: sans-serif;
+        color: #6f6f6f;
+    }
+    
+</style>
+{% endblock %}

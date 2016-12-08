@@ -1,0 +1,283 @@
+{% extends "templates/base1.html" %}
+{% block main %}
+
+    <div class="blogpost">
+        
+        <div class="edit">
+            <a href="/{{blogpost.key.id()}}/edit">Edit</a>
+            <a href="/{{blogpost.key.id()}}/delete">Delete</a>
+        </div>
+
+        
+        <div class="top">
+            <div class="upvotes">
+                <form method="post"><button type="submit" name="{{votedir}}" value="like">{{vote_direction}}</button></form>
+                <p>{{upvotes}}</p>
+            </div>
+
+            <div class="titlebar">
+                <h3>{{title}}</h3>
+                <p style="float: left">By {{user}}</p>
+                <p style="float: right">{{date_created}}</p>
+            </div>
+        </div>
+
+        <div class="content">
+            <pre>
+            {{post_content}}</pre>
+        </div>
+        
+        <div class="likebar">
+            <h4>COMMENTS</h4>
+            
+            {% if blogpost.comments %}
+            <form method="post">
+                <table>
+                    {% for comment in blogpost.comments %}
+                        <tr id="{{comment.id()}}">
+                            <input class="blog_id" type="hidden" value="{{blogpost.key.id()}}">
+                            <p class="blog_id" style="display: none;">{{blogpost.key.id()}}</p>
+                            <td class="left"><p>{{comment.get().commenter.get().username}}</p></td>
+                            <td class="right">
+                                <p class="comment-text" id="{{comment.id()}}">{{comment.get().text}}</p>
+                            </td>
+                            <td>
+                                <div class="edit2">
+                                    <button class="edit-comment" name="{{comment.id()}}">Edit</button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </form>
+
+            {% endif %}
+            
+            <form method="post">
+                <input type="text" name="comment">
+                <input type="hidden" name="id" value={{blogpost.key.id()}}>
+                <button type="submit" name="newcomment" value="newcomment">Submit</button>
+            </form>
+            
+
+        </div>
+        
+    </div>
+{% endblock %}
+{% block css %}
+<style>
+    
+    .topbar {
+        height: 50px;
+        display: block;
+        width: 100%;
+        margin: -7px 0 40px 0;
+        padding-bottom: 30px;
+        border-bottom: 4px solid black;
+    }
+    
+    body h3 {
+        margin: 0 0 30px 50px;
+        font-style: italic;
+    }
+
+    .header {
+        margin-left: 20px;
+        float: left;
+    }
+    
+    .header p {
+        font-size: 13px;
+        margin-left: 4px;
+    }
+
+    .nav {
+        margin-top: 8px;
+        margin-right: 20px;
+        float: right;
+    }
+    
+    .nav div {
+        display: inline-block;
+        margin: 20px 15px;
+    }
+    
+    .nav a {
+        font-size: 20px;
+        text-decoration: none;
+    }
+    
+    .blogpost {
+        margin-left: 30px;
+        width: 600px;
+    }
+
+    .top {
+        width: 600px;
+        clear: both;
+    }
+    
+    .top div {
+        display: inline;
+        max-width: 550px;
+    }
+    
+    .top .upvotes {
+        margin-top: 0;
+        text-align: center;
+        padding: 20px 0;
+        background-color: floralwhite;
+        width: 50px;
+        float: left;
+    }
+    
+    #liked {
+        background-color: red;   
+    }
+    
+    .top .titlebar {
+        width: 520px;
+        padding: 0 10px;
+        background-color: #f9f8f8;
+        display: inline-block;
+        border-bottom: 1px solid lightgray;
+    }
+    
+    .titlebar h3 {
+        margin-left: 0;
+        margin-bottom: 0;
+    }
+    
+    .titlebar hr {
+        color: black;
+        clear: both;
+    }
+    
+    .edit {
+        display: block;
+        width: 100%;
+    }
+
+    .edit a {
+        text-decoration: none;
+        color: darkgray;
+        margin-right: 10px;
+        font-size: 12px;
+        float: right;
+    }
+    
+    .content {
+        width: 550px;
+        padding: 10px 0;
+        margin-left: 50px;
+        margin-bottom: 0;
+    }
+    
+    .content pre {
+        width: inherit;
+        white-space: pre-wrap;
+    }
+    
+    .likebar {
+        height: 20px;
+        width: 550px;
+        margin-left: 50px;
+        margin-top: -20px;
+        font-size: 15px;
+        border-top: 1px solid lightgray;
+    }
+    
+    .likebar h4 {
+        margin-top: 0px;
+        margin-bottom: -2px;
+        font-size: 11px;
+        font-family: BlinkMacSystemFont;
+        padding: 7px;
+        color: cornflowerblue;
+        background-color: white;
+        border: none;
+    }
+    
+    .likebar table {
+        margin-top: 10px;
+        margin-left: 3px;
+        border-collapse: separate;
+        border-spacing: 0 5px;
+        margin-bottom: 20px;
+    }
+    
+    .likebar tr {
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .left p {
+        font-weight: bold;
+        font-size: 12px;
+        margin: 0px 5px 0 5px;
+        font-family: sans-serif;
+    }
+    
+    .likebar form {
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+    
+    .likebar form input {
+        width: 470px;
+        height: 50px;
+    }
+    
+    .right p {
+        display: inline-block;
+        font-size: 12px;
+        font-family: sans-serif;
+        color: #6f6f6f;
+    }
+    
+    
+    .right textarea {
+        display: inline-block;
+        font-size: 12px;
+        font-family: sans-serif;
+        color: #6f6f6f;
+    }
+    
+    .edit2 {
+        display: inline-block;
+        width: 30px;
+        margin-left: 10px;
+        margin-top: -10px;
+    }
+    
+    .edit2 button {
+        width: 40px;
+        font-size: 8px;
+        float: right;
+    }
+    
+</style>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+
+<script type="text/javascript">
+    
+    $('.edit-comment').click(function(e) {
+        e.preventDefault();
+        var comment_id = '#' + this.name;
+        var old_text = $(comment_id + ' .right p').text();
+        var comment_writer = $(comment_id + ' .left p').text();
+        var blog_id = $(comment_id + ' .blog_id').val();
+        
+        var form = '<input type="hidden" name="edited_comment_id" value=' + this.name + '><input type="hidden" name="blog_id" value=' + blog_id + '><input type="hidden" name="comment_writer" value=' + comment_writer + '><textarea name="new_text">' + old_text + '</textarea>';
+        
+        var new_buttons = '<button name="save" type="submit" value="save">Save</button><button name="cancel" type="submit" value="cancel">Cancel</button><button name="delete" type="submit" value="delete">Delete</button>'
+        
+        $(comment_id + ' .right p').replaceWith(form);
+        $(comment_id + ' .edit2 button').replaceWith(new_buttons);
+    });
+    
+</script>
+{% endblock %}

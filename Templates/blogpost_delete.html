@@ -1,0 +1,206 @@
+{% extends "templates/base1.html" %}
+{% block main %}
+    <div class="blogpost">
+        
+        <form method="post">
+            <button class="confirm" type="submit">YES, DELETE!!!</button>
+        </form>
+        
+        <div class="top">
+            <div class="upvotes">
+                {{upvotes}}
+            </div>
+
+            <div class="titlebar">
+                <h3>{{title}}</h3>
+                <p style="float: left">By {{user}}</p>
+                <p style="float: right">{{date_created}}</p>
+            </div>
+        </div>
+
+        <div class="content">
+            <pre>
+            {{post_content}}</pre>
+        </div>
+        
+        <div class="likebar">
+            <h4>COMMENTS</h4>
+            {% if blogpost.comments %}
+            <table>
+                {% for comment in comments %}
+                <tr>
+                    <td class="left"><p>{{comment.commenter.get().username}}:</p></td>
+                    <td class="right"><p>{{comment.text}}</p></td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block css %}
+<style>
+    
+    .topbar {
+        height: 50px;
+        display: block;
+        width: 100%;
+        margin: -7px 0 40px 0;
+        padding-bottom: 30px;
+        border-bottom: 4px solid black;
+    }
+    
+    body h3 {
+        margin: 0 0 30px 50px;
+        font-style: italic;
+    }
+
+    .header {
+        margin-left: 20px;
+        float: left;
+    }
+    
+    .header p {
+        font-size: 13px;
+        margin-left: 4px;
+    }
+
+    .nav {
+        margin-top: 8px;
+        margin-right: 20px;
+        float: right;
+    }
+    
+    .nav div {
+        display: inline-block;
+        margin: 20px 15px;
+    }
+    
+    .nav a {
+        font-size: 20px;
+        text-decoration: none;
+    }
+
+    
+    .blogpost {
+        width: 550px;
+    }
+    
+    .confirm {
+        width: 100px;
+        height: 30px;
+        background-color: crimson;
+        color: white;
+        font-weight: bold;
+        margin-bottom: 30px;
+        margin-left: 50px;
+    }
+    
+    .top {
+        width: 550px;
+        clear: both;
+    }
+    
+    .top div {
+        display: inline;
+        max-width: 520px;
+    }
+    
+    .top .upvotes {
+        margin-top: 0;
+        text-align: center;
+        padding: 20px 0;
+        background-color: floralwhite;
+        width: 30px;
+        float: left;
+    }
+    
+    .top .titlebar {
+        width: 490px;
+        padding: 0 10px;
+        background-color: #f9f8f8;
+        display: inline-block;
+        border-bottom: 1px solid lightgray;
+    }
+    
+    .titlebar h3 {
+        margin-left: 0;
+        margin-bottom: 0;
+    }
+    
+    .titlebar hr {
+        color: black;
+        clear: both;
+    }
+    
+    .edit {
+        display: block;
+        width: 100%;
+    }
+
+    .edit a {
+        text-decoration: none;
+        color: darkgray;
+        margin-right: 10px;
+        font-size: 12px;
+        float: right;
+    }
+    
+    .content {
+        width: 500px;
+        padding: 10px 0;
+        margin-left: 30px;
+        margin-bottom: 0;
+    }
+    
+    .content pre {
+        width: inherit;
+        white-space: pre-wrap;
+    }
+    
+    .likebar {
+        height: 20px;
+        width: 500px;
+        margin-left: 30px;
+        margin-top: -20px;
+        font-size: 15px;
+        border-top: 1px solid lightgray;
+    }
+    
+    .likebar h4 {
+        margin-top: 0px;
+        margin-bottom: -2px;
+        font-size: 11px;
+        font-family: BlinkMacSystemFont;
+        padding: 7px;
+        color: cornflowerblue;
+        background-color: white;
+        border: none;
+    }
+    
+    .likebar table {
+        margin-top: 10px;
+        margin-left: 3px;
+        border-collapse: separate;
+        border-spacing: 0 5px;
+    }
+    
+    .likebar tr {
+        margin-top: 10px;
+    }
+    
+    .left p {
+        font-weight: bold;
+        font-size: 12px;
+        margin: -15px 5px 0 5px;
+        font-family: sans-serif;
+    }
+    
+    .right p {
+        font-size: 12px;
+        font-family: sans-serif;
+        color: #6f6f6f;
+    }
+</style>
+{% endblock %}
